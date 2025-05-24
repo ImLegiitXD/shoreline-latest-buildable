@@ -29,14 +29,13 @@ public final class CapesModule extends ToggleModule
     public CapesModule()
     {
         super("Capes", "Shows player capes", ModuleCategory.CLIENT);
-        enable();
         instance = this;
     }
 
     @Override
     public void onEnable()
     {
-        if (mc.options == null)
+        if (mc == null || mc.options == null)
         {
             return;
         }
@@ -47,7 +46,7 @@ public final class CapesModule extends ToggleModule
     @Override
     public void onDisable()
     {
-        if (mc.options == null)
+        if (mc == null || mc.options == null)
         {
             return;
         }
@@ -57,7 +56,9 @@ public final class CapesModule extends ToggleModule
     @EventListener
     public void onGameJoinEvent(GameJoinEvent event)
     {
-        onEnable();
+        if (isEnabled()) {
+            onEnable();
+        }
     }
 
     @EventListener

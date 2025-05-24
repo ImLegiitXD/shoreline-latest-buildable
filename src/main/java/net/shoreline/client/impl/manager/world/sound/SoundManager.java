@@ -5,7 +5,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.shoreline.client.util.Globals;
-import net.shoreline.loader.resource.ResourcePackExt;
+import net.shoreline.client.util.resource.ResourcePackExt;
 
 /**
  * @author linus

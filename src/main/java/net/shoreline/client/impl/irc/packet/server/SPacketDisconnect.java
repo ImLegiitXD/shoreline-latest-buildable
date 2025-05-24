@@ -3,9 +3,9 @@ package net.shoreline.client.impl.irc.packet.server;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.util.Formatting;
+import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.irc.IRCManager;
 import net.shoreline.client.impl.irc.packet.ServerPacket;
-import net.shoreline.loader.Loader;
 
 public final class SPacketDisconnect extends ServerPacket
 {
@@ -57,7 +57,7 @@ public final class SPacketDisconnect extends ServerPacket
                 this.reason
         );
 
-        Loader.error(finalMessage);
+        Shoreline.error(finalMessage);
 
         ircManager.addToChat(Formatting.RED + message);
         ircManager.addToChat(Formatting.RED + "Reason: " + this.reason);

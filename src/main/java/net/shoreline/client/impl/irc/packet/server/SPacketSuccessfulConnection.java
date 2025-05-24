@@ -2,9 +2,9 @@ package net.shoreline.client.impl.irc.packet.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.irc.IRCManager;
 import net.shoreline.client.impl.irc.packet.ServerPacket;
-import net.shoreline.loader.Loader;
 
 public final class SPacketSuccessfulConnection extends ServerPacket
 {
@@ -46,7 +46,7 @@ public final class SPacketSuccessfulConnection extends ServerPacket
                 ircManager.ATTEMPTED_RECONNECT_AT_SOME_POINT ? "re-" : ""
         );
 
-        Loader.info(message);
+        Shoreline.info(message);
         ircManager.addToChat(message);
     }
 }

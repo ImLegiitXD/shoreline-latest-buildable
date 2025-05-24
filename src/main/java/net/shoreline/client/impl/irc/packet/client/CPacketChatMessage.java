@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.Formatting;
 import net.shoreline.client.impl.irc.IRCManager;
 import net.shoreline.client.impl.irc.packet.IRCPacket;
-import net.shoreline.loader.Loader;
 
 public final class CPacketChatMessage extends IRCPacket
 {
@@ -26,16 +25,16 @@ public final class CPacketChatMessage extends IRCPacket
     @Override
     public void onSend(IRCManager ircManager)
     {
-        Formatting colorCode = switch (Loader.SESSION.getUserType())
+        /*Formatting colorCode = switch (Loader.SESSION.getUserType())
         {
             case "dev" -> Formatting.RED;
             case "beta" -> Formatting.BLUE;
             case "release" -> Formatting.GRAY;
             default -> throw new IllegalStateException("unknown type");
-        };
+        };*/
 
-        String message = colorCode
-                + "<" + Loader.SESSION.getUsername() + "> " + Formatting.GRAY + this.message;
+        //String message = colorCode
+        //        + "<" + /*Loader.SESSION.getUsername() +*/ "> " + Formatting.GRAY + this.message;
 
         if (ircManager.MUTED)
         {

@@ -1,12 +1,12 @@
 package net.shoreline.client.impl.irc;
 
+import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.irc.packet.IRCPacket;
 import net.shoreline.client.impl.irc.packet.ServerPacket;
 import net.shoreline.client.impl.irc.packet.client.CPacketPing;
 import net.shoreline.client.impl.irc.user.OnlineUser;
 import net.shoreline.client.util.Globals;
 import net.shoreline.client.util.chat.ChatUtil;
-import net.shoreline.loader.Loader;
 
 import java.util.List;
 import java.util.Queue;
@@ -76,7 +76,7 @@ public final class IRCManager implements Globals
                     packet.apply(this);
                 } else
                 {
-                    Loader.error("Received an unknown server packet: {}", incoming);
+                    Shoreline.error("Received an unknown server packet: {}", incoming);
                 }
             }
 

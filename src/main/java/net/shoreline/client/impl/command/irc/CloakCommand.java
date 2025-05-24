@@ -7,19 +7,18 @@ import net.shoreline.client.api.command.Command;
 import net.shoreline.client.impl.irc.IRCManager;
 import net.shoreline.client.impl.irc.packet.client.CPacketCloak;
 import net.shoreline.client.util.chat.ChatUtil;
-import net.shoreline.loader.Loader;
 
 import java.util.List;
 
 public final class CloakCommand extends Command
 {
-    private final String userType;
+    //private final String userType;
     private static final List<String> VALID_ARGS = List.of("dev", "beta", "release");
 
     public CloakCommand()
     {
         super("Cloak", "Cloaks your online user rank", literal("cloak"));
-        this.userType = Loader.SESSION.getUserType();
+        //this.userType = Loader.SESSION.getUserType();
     }
 
     @Override
@@ -50,11 +49,13 @@ public final class CloakCommand extends Command
 
     public String[] getSuggestions()
     {
-        return switch (this.userType)
+        /*return switch (this.userType)
         {
             case "dev" -> VALID_ARGS.toArray(new String[0]);
             case "beta" -> new String[] { "beta", "release" };
             default -> throw new IllegalStateException("unauthorized");
         };
+    }*/
+        return new String[0];
     }
 }

@@ -3,7 +3,6 @@ package net.shoreline.client.init;
 import net.shoreline.client.Shoreline;
 import net.shoreline.client.impl.font.AWTFontRenderer;
 import net.shoreline.client.impl.font.VanillaTextRenderer;
-import net.shoreline.loader.Loader;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,9 +39,9 @@ public class Fonts
         try
         {
             CLIENT = new AWTFontRenderer(FONT_FILE_PATH.startsWith("assets") ?
-                    Loader.getResource(FONT_FILE_PATH) : new FileInputStream(FONT_FILE_PATH), FONT_SIZE);
+                    Shoreline.getResource(FONT_FILE_PATH) : new FileInputStream(FONT_FILE_PATH), FONT_SIZE);
             CLIENT_UNSCALED = new AWTFontRenderer(FONT_FILE_PATH.startsWith("assets") ?
-                    Loader.getResource(FONT_FILE_PATH) : new FileInputStream(FONT_FILE_PATH), 9.0f);
+                    Shoreline.getResource(FONT_FILE_PATH) : new FileInputStream(FONT_FILE_PATH), 9.0f);
         }
         catch (IOException e)
         {
@@ -62,7 +61,7 @@ public class Fonts
         try
         {
             CLIENT = new AWTFontRenderer(FONT_FILE_PATH.startsWith("assets") ?
-                    Loader.getResource(FONT_FILE_PATH) : new FileInputStream(FONT_FILE_PATH), FONT_SIZE);
+                    Shoreline.getResource(FONT_FILE_PATH) : new FileInputStream(FONT_FILE_PATH), FONT_SIZE);
         }
         catch (IOException e)
         {

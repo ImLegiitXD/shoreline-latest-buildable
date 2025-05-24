@@ -26,6 +26,7 @@ import net.shoreline.client.impl.manager.world.BlockManager;
 import net.shoreline.client.impl.manager.world.WaypointManager;
 import net.shoreline.client.impl.manager.world.sound.SoundManager;
 import net.shoreline.client.impl.manager.world.tick.TickManager;
+import net.shoreline.client.init.Fonts;
 
 /**
  * @author linus

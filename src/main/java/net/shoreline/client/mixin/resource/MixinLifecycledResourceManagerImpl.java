@@ -4,7 +4,7 @@ import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
 import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.NamespaceResourceManager;
 import net.minecraft.resource.ResourcePack;
-import net.shoreline.loader.resource.ResourcePackExt;
+import net.shoreline.client.util.resource.ResourcePackExt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

@@ -2,82 +2,73 @@ package net.shoreline.eventbus;
 
 import net.shoreline.eventbus.event.Event;
 
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public final class EventBus
-{
+public final class EventBus {
     public static final EventBus INSTANCE = new EventBus();
 
-    /**
-     * A Map<Class<Event>, Invoker> where the keys are the linked list for that event type.
-     *
-     * So the list may look like...
-     *
-     * <PacketEvent:Invoker>,
-     * <RenderEvent:Invoker>,
-     * <JoinGameEvent:Invoker>
-     *
-     * This way, instead of a single linked list that we iterate down each time an event is posted,
-     * we query the map to get the linked list associated with a certain event and invoke ALL the events
-     * on that chain of invokers, without checking if the methodType matches the eventType.
-     *
-     * If we are in a development environment, use reflection to gather every Event class instance.
-     * then put them in the map with a null invoker (stop_decompiling_1(null, null, null, null)).
-     * (@see DevEventBusLoader)
-     *
-     * If we are loading the client dynamically, each time the native class loader encounters a class that
-     * extends Event, it puts it on this map with a null invoker.
-     *
-     * So essentially there is no computeIfAbsent for this list, it is always filled when the DLL is loaded.
-     */
-    private Map<Class<Event>, InvokerNode> event2InvokerMap;
+    private final Map<Class<?>, List<Invoker>> eventHandlers = new ConcurrentHashMap<>();
+    private final Map<Object, List<RegisteredHandler>> subscriberHandlers = new ConcurrentHashMap<>();
 
-
-    private EventBus()
-    {
-    }
-
-    /**
-     * Iterate through the linked list for the event and invoke any entries matching the event type
-     */
-    public void dispatch(Event event)
-    {
-        InvokerNode head = this.event2InvokerMap.get(event.getClass());
-        InvokerNode current = head.next;
-
-        while (current != null)
-        {
-            current.invoker.invoke(event);
-            current = current.next;
+    public void dispatch(Event event) {
+        List<Invoker> handlers = eventHandlers.get(event.getClass());
+        if (handlers != null) {
+            for (Invoker handler : handlers) {
+                handler.invoke(event);
+            }
         }
     }
 
-    public native Object subscribe(Object subscriber);
+    public void subscribe(Object subscriber) {
+        for (Method method : subscriber.getClass().getDeclaredMethods()) {
+            if (method.getParameterCount() == 1 && Event.class.isAssignableFrom(method.getParameterTypes()[0])) {
+                Class<?> eventType = method.getParameterTypes()[0];
+                method.setAccessible(true);
 
-    public native Object unsubscribe(Object subscriber);
+                Invoker invoker = event -> {
+                    try {
+                        method.invoke(subscriber, event);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                };
 
-    @SuppressWarnings({"unused", "FieldCanBeLocal"}) // Used natively
-    public final static class InvokerNode
-    {
-        private final InvokerNode next;
-        private final Invoker invoker;
-        private final Object subscriber;
-        private final Integer priority; // not int, for objectfuscation in bonfuscator
+                eventHandlers.computeIfAbsent(eventType, k -> new ArrayList<>()).add(invoker);
+                subscriberHandlers.computeIfAbsent(subscriber, k -> new ArrayList<>())
+                        .add(new RegisteredHandler(eventType, invoker));
+            }
+        }
+    }
 
-        private InvokerNode(Object invoker,
-                            Object subscriber,
-                            Object priority)
-        {
-            this.next = null;
-            this.invoker = (Invoker) invoker;
-            this.subscriber = subscriber;
-            this.priority = (Integer) priority;
+    public void unsubscribe(Object subscriber) {
+        List<RegisteredHandler> handlers = subscriberHandlers.remove(subscriber);
+        if (handlers != null) {
+            for (RegisteredHandler handler : handlers) {
+                List<Invoker> invokers = eventHandlers.get(handler.eventType);
+                if (invokers != null) {
+                    invokers.remove(handler.invoker);
+                    if (invokers.isEmpty()) {
+                        eventHandlers.remove(handler.eventType);
+                    }
+                }
+            }
         }
     }
 
     @FunctionalInterface
-    public interface Invoker
-    {
-        void invoke(Object event);
+    public interface Invoker {
+        void invoke(Event event);
+    }
+
+    private static class RegisteredHandler {
+        final Class<?> eventType;
+        final Invoker invoker;
+
+        RegisteredHandler(Class<?> eventType, Invoker invoker) {
+            this.eventType = eventType;
+            this.invoker = invoker;
+        }
     }
 }

@@ -13,10 +13,10 @@
   "environment": "client",
   "entrypoints": {
     "preLaunch": [
-      "net.shoreline.loader.Loader"
+      "net.shoreline.client.Shoreline"
     ],
     "client": [
-      "net.shoreline.loader.Loader"
+      "net.shoreline.client.Shoreline"
     ]
   },
   "mixins": [

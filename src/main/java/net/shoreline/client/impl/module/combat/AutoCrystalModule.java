@@ -58,7 +58,6 @@ import net.shoreline.client.util.render.animation.Animation;
 import net.shoreline.client.util.world.BlastResistantBlocks;
 import net.shoreline.client.util.world.ExplosionUtil;
 import net.shoreline.eventbus.annotation.EventListener;
-import net.shoreline.loader.Loader;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -190,11 +189,9 @@ public class AutoCrystalModule extends CombatModule
                 ModuleCategory.COMBAT, 750);
         INSTANCE = this;
 
-        if (!Loader.SESSION.getUserType().equals("release"))
-        {
             register(debugConfig);
             register(debugDamageConfig);
-        }
+
     }
 
     public static AutoCrystalModule getInstance()

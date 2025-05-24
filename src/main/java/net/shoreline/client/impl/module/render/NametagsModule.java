@@ -55,7 +55,6 @@ import net.shoreline.client.mixin.accessor.AccessorTextRenderer;
 import net.shoreline.client.util.entity.FakePlayerEntity;
 import net.shoreline.client.util.render.ColorUtil;
 import net.shoreline.eventbus.annotation.EventListener;
-import net.shoreline.loader.Loader;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
@@ -86,7 +85,7 @@ public class NametagsModule extends ToggleModule
     Config<Boolean> entityIdConfig = register(new BooleanConfig("EntityId", "Displays the player's entity id", false));
     Config<Boolean> gamemodeConfig = register(new BooleanConfig("Gamemode", "Displays the player's gamemode", false));
     // Pooron check
-    Config<Boolean> onlineUsersConfig = register(new BooleanConfig("OnlineUsers", "Displays the online users of Shoreline", true, () -> !Loader.SESSION.getUserType().equals("release")));
+    //Config<Boolean> onlineUsersConfig = register(new BooleanConfig("OnlineUsers", "Displays the online users of Shoreline", true, () -> !Loader.SESSION.getUserType().equals("release")));
     Config<Boolean> pingConfig = register(new BooleanConfig("Ping", "Displays the player's server connection ping", true));
     Config<Boolean> healthConfig = register(new BooleanConfig("Health", "Displays the player's current health", true));
     Config<Boolean> totemsConfig = register(new BooleanConfig("Totems", "Displays the player's popped totem count", false));
@@ -152,7 +151,7 @@ public class NametagsModule extends ToggleModule
                 double ry = player.getY() - pinterpolate.getY();
                 double rz = player.getZ() - pinterpolate.getZ();
                 float w1 = FontModule.getInstance().isEnabled() ? Fonts.CLIENT_UNSCALED.getStringWidth(info) : mc.textRenderer.getWidth(info);
-                int width = (int) (w1 + (isOnlineUser(player) ? 10 : 0));
+                int width = (int) w1;
                 float hwidth = width / 2.0f;
                 double dx = (pos.getX() - interpolate.getX()) - rx;
                 double dy = (pos.getY() - interpolate.getY()) - ry;
@@ -265,7 +264,7 @@ public class NametagsModule extends ToggleModule
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-camera.getYaw()));
         matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
         matrices.scale(-scaling, -scaling, 1.0f);
-        if (backgroundConfig.getValue())
+        /*if (backgroundConfig.getValue())
         {
             RenderManager.rect(matrices, isOnlineUser(entity) ? -width - 3.0f : -width - 1.0f, -1.0f, width * 2.0f + (isOnlineUser(entity) ? 5.0f : 2.5f),
                     mc.textRenderer.fontHeight + 1.0f, 0.0, 0x55000400);
@@ -274,27 +273,27 @@ public class NametagsModule extends ToggleModule
         {
             RenderManager.borderedRectLine(matrices, isOnlineUser(entity) ? -width - 3.0f : -width - 1.0f, -1.0f, width * 2.0f + (isOnlineUser(entity) ? 5.0f : 2.5f),
                     mc.textRenderer.fontHeight + 1.0f, entity != mc.player && Managers.SOCIAL.isFriend(entity.getDisplayName().getString()) ? SocialsModule.getInstance().getFriendRGB() : ColorsModule.getInstance().getRGB());
-        }
+        }*/
 
         int color = getNametagColor(entity);
         renderItems(matrices, entity);
 
         OnlineUser onlineUser = IRCManager.getInstance().findOnlineUser(entity.getGameProfile().getName());
-        if (onlineUsersConfig.getValue() && onlineUser != null)
+        /*if (onlineUsersConfig.getValue() && onlineUser != null)
         {
             Identifier identifier = getNametagLogo(onlineUser.getUsertype());
             RenderManager.rectTextured(matrices, identifier, (int) -width - 1.5f, (int) -width + 6.0f,
                     0.5f, 8.0f, 0, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-        }
+        }*/
 
-        drawText(matrices, info, isOnlineUser(entity) ? -width + 10.0f : -width, 0.0f, color);
+        //drawText(matrices, info, isOnlineUser(entity) ? -width + 10.0f : -width, 0.0f, color);
         GL11.glDepthFunc(GL11.GL_LEQUAL);
     }
 
-    private boolean isOnlineUser(PlayerEntity entity)
+    /*private boolean isOnlineUser(PlayerEntity entity)
     {
         return onlineUsersConfig.getValue() && IRCManager.getInstance().findOnlineUser(entity.getGameProfile().getName()) != null;
-    }
+    }*/
 
     public Identifier getNametagLogo(OnlineUser.UserType onlineUser)
     {

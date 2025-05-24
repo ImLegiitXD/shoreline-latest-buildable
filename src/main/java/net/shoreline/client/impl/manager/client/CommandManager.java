@@ -20,7 +20,6 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import net.shoreline.eventbus.EventBus;
 import net.shoreline.eventbus.annotation.EventListener;
-import net.shoreline.loader.Loader;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -50,22 +49,12 @@ public class CommandManager implements Globals
     {
         EventBus.INSTANCE.subscribe(this);
 
-        String rank = Loader.SESSION.getUserType();
-
-        if (rank.equals("dev"))
-        {
-            register(new BroadcastServerMsgCommand());
-            register(new DirectServerMsgCommand());
-            register(new MuteCommand());
-            register(new UnmuteCommand());
-        }
-
-        if (rank.equals("dev") || rank.equals("beta"))
-        {
-            register(new CloakCommand());
-        }
-
         register(
+                new BroadcastServerMsgCommand(),
+                new DirectServerMsgCommand(),
+                new MuteCommand(),
+                new UnmuteCommand(),
+                new CloakCommand(),
                 new BindCommand(),
                 new ConfigCommand(),
                 new ConnectCommand(),
