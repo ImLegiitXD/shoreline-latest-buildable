@@ -1,14 +1,3 @@
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-
-import java.nio.file.Files
-import java.util.jar.JarEntry
-import java.util.jar.JarFile
-import java.util.jar.JarOutputStream
-
 plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'com.github.gmazzo.buildconfig' version '5.3.5'
@@ -41,10 +30,9 @@ loom {
 }
 
 repositories {
-    mavenCentral() {
-        url "https://jitpack.io"
-        url "https://impactdevelopment.github.io/maven/"
-    }
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url "https://impactdevelopment.github.io/maven/" }
 }
 
 dependencies {
@@ -60,6 +48,19 @@ processResources {
     inputs.property "version", project.version
     filesMatching("fabric.mod.json") {
         expand "version": project.version
+
+        filter { String line ->
+            if (line.trim().startsWith('"accessWidener"')) {
+                return null
+            }
+            if (line.trim().startsWith('"mixins"')) {
+                return null
+            }
+            if (line.trim().startsWith('}') && !line.contains('"mixins"')) {
+                return '  "mixins": ["mixins.shoreline.plugin.json"],\n' + line
+            }
+            return line
+        }
     }
 }
 
@@ -71,63 +72,14 @@ tasks.withType(JavaCompile).configureEach {
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
-    doFirst {
-        copy {
-            from zipTree(tasks.remapJar.archivePath)
-            into tempDir
-        }
+    from(sourceSets.main.output) {
+        exclude 'fabric.mod.json'
+    }
 
-        File fabricModFile = new File(tempDir, 'fabric.mod.json')
-        if (fabricModFile.exists()) {
-            def text = fabricModFile.text
-
-            Gson gson = new GsonBuilder().setPrettyPrinting().create()
-            JsonObject obj = JsonParser.parseString(text)
-
-            JsonArray mixins = new JsonArray()
-            mixins.add("mixins.shoreline.plugin.json")
-
-            obj.add("mixins", mixins)
-            //obj.remove("accessWidener")
-
-            fabricModFile.text = gson.toJson(obj)
-        }
+    from(processResources) {
+        include 'fabric.mod.json'
     }
 }
-
-tasks.register('clientJar', Jar) {
-    dependsOn remapJar
-
-    outputs.upToDateWhen { false }
-
-    from(zipTree(tasks.remapJar.archivePath))
-
-    include 'net/shoreline/client/**'
-    include 'net/shoreline/eventbus/**'
-    include 'assets/**'
-    include 'shoreline-refmap.json'
-    include 'shoreline.accesswidener'
-
-    archiveBaseName = "client-raw"
-    archiveClassifier = ""
-    archiveVersion = ""
-
-    doFirst {
-        copy {
-            from zipTree(tasks.clientJar.archivePath)
-            into tempDir
-        }
-
-        File shorelineRefmap = new File(tempDir, 'shoreline-refmap.json')
-        if (shorelineRefmap.exists()) {
-            def text = shorelineRefmap.text
-            text = text.replaceAll('/', '.')
-            shorelineRefmap.text = text
-        }
-    }
-}
-
-build.dependsOn(clientJar)
 
 def execute(String cmd) {
     try {
