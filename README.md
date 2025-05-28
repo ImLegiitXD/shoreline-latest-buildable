@@ -1,11 +1,14 @@
-# shoreline-client
-![image](https://github.com/user-attachments/assets/959bbec3-eaef-4b8c-acd5-05364b0c2de1)
-SHOUTOUT THE RUSSIANS FOR THE 5K DEAL LOLOLOL
+# Shoreline Client
 
+Needs [Baritone API](https://github.com/cabaletta/baritone/releases/download/v1.11.2/baritone-api-fabric-1.11.2.jar) in order to work.
+[Build for 1.21.1](https://github.com/ImLegiitXD/shoreline-client-buildable/releases)
 
+### **ClickGUI:**  
+![image](https://github.com/user-attachments/assets/ab74c01c-0181-4c6e-bc3d-00dc76bbd8ff)
 
-![image](https://github.com/user-attachments/assets/a6d1ceec-c8f7-4e03-a967-14c54b42765d)
+### **Credits**  
+- **[this guy](https://github.com/Skitttyy/shoreline-client)** – for the src  
 
-# TO MAKE BUILDABLE:
-this src doesnt include the loader because my bestie bon55 made it so i didnt leak loader but the loader contains the event bus
-u need to skid event bus from public shoreline or make own event bus
+~~# TO MAKE BUILDABLE:~~
+~~this src doesnt include the loader because my bestie bon55 made it so i didnt leak loader but the loader contains the event bus
+u need to skid event bus from public shoreline or make own event bus~~
