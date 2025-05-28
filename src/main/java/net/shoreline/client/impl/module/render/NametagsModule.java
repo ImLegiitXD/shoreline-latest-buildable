@@ -66,6 +66,7 @@ import java.nio.IntBuffer;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @author linus
@@ -216,14 +217,20 @@ public class NametagsModule extends ToggleModule
                 }
             }
         }
-        if (soundsConfig.getValue())
-        {
+        if (soundsConfig.getValue()) {
             sounds.entrySet().removeIf(e -> System.currentTimeMillis() - e.getValue() > 1000);
-            for (Map.Entry<SoundRender, Long> entry : sounds.entrySet())
-            {
+            for (Map.Entry<SoundRender, Long> entry : sounds.entrySet()) {
                 SoundEvent soundEvent = entry.getKey().soundEvent();
                 Vec3d renderPos = entry.getKey().pos();
-                RenderManager.renderSign(soundEvent.getId().toShortTranslationKey(), renderPos.x, renderPos.y, renderPos.z, -1);
+                String soundName = soundEvent.getId().getPath()
+                        .replace('_', ' ')
+                        .replace('.', ' ');
+                soundName = Arrays.stream(soundName.split(" "))
+                        .filter(word -> !word.isEmpty())
+                        .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+                        .collect(Collectors.joining(" "));
+
+                RenderManager.renderSign(soundName, renderPos.x, renderPos.y, renderPos.z, -1);
             }
         }
 
