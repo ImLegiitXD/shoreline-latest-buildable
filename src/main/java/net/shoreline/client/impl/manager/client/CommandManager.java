@@ -12,7 +12,6 @@ import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.command.Command;
 import net.shoreline.client.api.module.Module;
 import net.shoreline.client.impl.command.*;
-import net.shoreline.client.impl.command.irc.*;
 import net.shoreline.client.impl.event.gui.chat.ChatMessageEvent;
 import net.shoreline.client.impl.event.gui.screen.SuggestChatEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
@@ -20,7 +19,6 @@ import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.Globals;
 import net.shoreline.eventbus.EventBus;
 import net.shoreline.eventbus.annotation.EventListener;
-import net.shoreline.loader.Loader;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -50,27 +48,13 @@ public class CommandManager implements Globals
     {
         EventBus.INSTANCE.subscribe(this);
 
-        String rank = Loader.SESSION.getUserType();
-
-        if (rank.equals("dev"))
-        {
-            register(new BroadcastServerMsgCommand());
-            register(new DirectServerMsgCommand());
-            register(new MuteCommand());
-            register(new UnmuteCommand());
-        }
-
-        if (rank.equals("dev") || rank.equals("beta"))
-        {
-            register(new CloakCommand());
-        }
+        String rank = "dev";
 
         register(
                 new BindCommand(),
                 new ConfigCommand(),
                 new ConnectCommand(),
                 new CoordsCommand(),
-                new DirectMessageCommand(),
                 new DisableAllCommand(),
                 new DrawnCommand(),
                 new CustomFontCommand(),
@@ -79,14 +63,12 @@ public class CommandManager implements Globals
                 new HelpCommand(),
                 new HideAllCommand(),
                 new HistoryCommand(),
-                new LastCommand(),
                 new LeaveCommand(),
                 new LoadCommand(),
                 new MacroCommand(),
                 new ModulesCommand(),
                 new NbtCommand(),
                 new NotifyCommand(),
-                new OnlineCommand(),
                 new OpenFolderCommand(),
                 new PrefixCommand(),
                 new QueueCommand(),
@@ -95,7 +77,6 @@ public class CommandManager implements Globals
                 new ResetGuiCommand(),
                 new SaveCommand(),
                 new ReloadSoundCommand(),
-                new ReplyCommand(),
                 new SkinGrabCommand(),
                 new StatsCommand(),
                 new ToggleCommand(),

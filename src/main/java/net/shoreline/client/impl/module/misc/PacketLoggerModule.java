@@ -5,6 +5,7 @@ import net.minecraft.network.packet.c2s.common.CommonPongC2SPacket;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
+import net.shoreline.client.Shoreline;
 import net.shoreline.client.api.config.Config;
 import net.shoreline.client.api.config.setting.BooleanConfig;
 import net.shoreline.client.api.module.ModuleCategory;
@@ -14,7 +15,6 @@ import net.shoreline.client.impl.event.network.DisconnectEvent;
 import net.shoreline.client.impl.event.network.PacketEvent;
 import net.shoreline.eventbus.annotation.EventListener;
 import net.shoreline.eventbus.event.StageEvent;
-import net.shoreline.loader.Loader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,13 +57,13 @@ public class PacketLoggerModule extends ToggleModule
     @Override
     public void onEnable()
     {
-        Loader.info("PacketLogger enabled ...");
+        Shoreline.info("PacketLogger enabled ...");
     }
 
     @Override
     public void onDisable()
     {
-        Loader.info("PacketLogger disabled ...");
+        Shoreline.info("PacketLogger disabled ...");
     }
 
     private void logPacket(Packet<?> packet, String msg, Object... args)
@@ -71,7 +71,7 @@ public class PacketLoggerModule extends ToggleModule
         String s = String.format(msg, args);
         if (logConfig.getValue())
         {
-            Loader.info(s);
+            Shoreline.info(s);
         }
         if (chatConfig.getValue())
         {
@@ -120,7 +120,7 @@ public class PacketLoggerModule extends ToggleModule
             strings.add(packet.toShortTranslationKey() + ": " + entry.getValue());
         }
 
-        Loader.info(String.join(",", strings));
+        Shoreline.info(String.join(",", strings));
     }
 
     @EventListener

@@ -12,8 +12,7 @@ import net.shoreline.client.impl.event.gui.chat.ChatMessageEvent;
 import net.shoreline.client.impl.event.gui.hud.RenderOverlayEvent;
 import net.shoreline.client.impl.event.keyboard.KeyboardInputEvent;
 import net.shoreline.client.impl.event.network.GameJoinEvent;
-import net.shoreline.client.impl.irc.IRCManager;
-import net.shoreline.client.impl.irc.packet.client.CPacketChatMessage;
+
 import net.shoreline.client.init.Managers;
 import net.shoreline.client.util.chat.ChatUtil;
 import net.shoreline.client.util.math.timer.CacheTimer;
@@ -117,7 +116,6 @@ public class ChatModule extends ToggleModule
             }
 
             event.cancel();
-            IRCManager.getInstance().sendPacket(new CPacketChatMessage(text));
             mc.inGameHud.getChatHud().addToMessageHistory(text);
         }
     }

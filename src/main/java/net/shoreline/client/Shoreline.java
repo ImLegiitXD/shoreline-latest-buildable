@@ -1,10 +1,13 @@
 package net.shoreline.client;
 
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.shoreline.client.api.Identifiable;
 import net.shoreline.client.api.file.ClientConfiguration;
-import net.shoreline.client.impl.irc.IRCManager;
 import net.shoreline.client.init.Managers;
-import net.shoreline.loader.Loader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -17,8 +20,10 @@ import java.util.concurrent.Executors;
  * @see ShorelineMod
  * @since 1.0
  */
-public class Shoreline
+@Environment(EnvType.CLIENT)
+public class Shoreline implements ClientModInitializer
 {
+    private static final Logger LOGGER = LogManager.getLogger("Shoreline");
     // Client configuration handler. This master saves/loads the client
     // configuration files which have been saved locally.
     public static ClientConfiguration CONFIG;
@@ -48,54 +53,42 @@ public class Shoreline
         // load configs AFTER everything has been initialized
         // this is to prevent configs loading before certain aspects of managers are available
         CONFIG.loadClient();
-
-        IRCManager.getInstance(); // Create new IRC manager
     }
 
-    public static void info(String message)
-    {
-        Loader.info(message);
+    @Override
+    public void onInitializeClient() {
+        init();
     }
 
-    public static void info(String message,
-                            Object... params)
-    {
-        Loader.info(message, params);
+    public static void info(String message) {
+        LOGGER.info(message);
     }
 
-    public static void info(Identifiable feature,
-                            String message)
-    {
-        Loader.info(String.format("[%s] %s", feature.getId(), message));
+    public static void info(String message, Object ... params) {
+        LOGGER.info(message, params);
     }
 
-    public static void info(Identifiable feature,
-                            String message,
-                            Object... params)
-    {
-        Loader.info(String.format("[%s] %s", feature.getId(), message), params);
+    public static void info(Identifiable feature, String message) {
+        LOGGER.info(String.format("[%s] %s", feature.getId(), message));
     }
 
-    public static void error(String message)
-    {
-        Loader.error(message);
+    public static void info(Identifiable feature, String message, Object ... params) {
+        LOGGER.info(String.format("[%s] %s", feature.getId(), message), params);
     }
 
-    public static void error(String message,
-                             Object... params)
-    {
-        Loader.error(message, params);
+    public static void error(String message) {
+        LOGGER.error(message);
     }
 
-    public static void error(Identifiable feature, String message)
-    {
-        Loader.error(String.format("[%s] %s", feature.getId(), message));
+    public static void error(String message, Object ... params) {
+        LOGGER.error(message, params);
     }
 
-    public static void error(Identifiable feature,
-                             String message,
-                             Object... params)
-    {
-        Loader.error(String.format("[%s] %s", feature.getId(), message), params);
+    public static void error(Identifiable feature, String message) {
+        LOGGER.error(String.format("[%s] %s", feature.getId(), message));
+    }
+
+    public static void error(Identifiable feature, String message, Object ... params) {
+        LOGGER.error(String.format("[%s] %s", feature.getId(), message), params);
     }
 }

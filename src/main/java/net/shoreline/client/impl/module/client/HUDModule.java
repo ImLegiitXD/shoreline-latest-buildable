@@ -54,7 +54,6 @@ import net.shoreline.client.util.render.animation.Easing;
 import net.shoreline.client.util.string.EnumFormatter;
 import net.shoreline.client.util.world.BlockUtil;
 import net.shoreline.eventbus.annotation.EventListener;
-import net.shoreline.loader.Loader;
 
 import java.awt.*;
 import java.text.DecimalFormat;
@@ -260,7 +259,7 @@ public class HUDModule extends ToggleModule
             {
                 RenderManager.renderText(
                         event.getContext(),
-                        String.format("UID %s", Loader.SESSION.getUID()),
+                        String.format("UID %s", "1"),
                         2.0F,
                         topLeft,
                         getHudColor(drawnCount - rainbowOffset)

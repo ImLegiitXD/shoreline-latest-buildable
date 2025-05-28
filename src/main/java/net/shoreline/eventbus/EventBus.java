@@ -1,13 +1,19 @@
 package net.shoreline.eventbus;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import net.shoreline.eventbus.EventHandler;
+import net.shoreline.eventbus.Listener;
+import net.shoreline.eventbus.annotation.EventListener;
 import net.shoreline.eventbus.event.Event;
 
-import java.util.Map;
-
-public final class EventBus
-{
-    public static final EventBus INSTANCE = new EventBus();
-
+public class EventBus implements EventHandler {
     /**
      * A Map<Class<Event>, Invoker> where the keys are the linked list for that event type.
      *
@@ -30,54 +36,49 @@ public final class EventBus
      *
      * So essentially there is no computeIfAbsent for this list, it is always filled when the DLL is loaded.
      */
-    private Map<Class<Event>, InvokerNode> event2InvokerMap;
 
+    public static final EventBus INSTANCE = new EventBus();
+    private final Set<Object> subscribers = Collections.synchronizedSet(new HashSet());
+    private final Map<Object, PriorityQueue<Listener>> listeners = new ConcurrentHashMap<Object, PriorityQueue<Listener>>();
 
-    private EventBus()
-    {
-    }
-
-    /**
-     * Iterate through the linked list for the event and invoke any entries matching the event type
-     */
-    public void dispatch(Event event)
-    {
-        InvokerNode head = this.event2InvokerMap.get(event.getClass());
-        InvokerNode current = head.next;
-
-        while (current != null)
-        {
-            current.invoker.invoke(event);
-            current = current.next;
+    @Override
+    public void subscribe(Object obj) {
+        if (this.subscribers.contains(obj)) {
+            return;
+        }
+        this.subscribers.add(obj);
+        for (Method method : obj.getClass().getMethods()) {
+            Class<?>[] params;
+            method.trySetAccessible();
+            if (!method.isAnnotationPresent(EventListener.class)) continue;
+            EventListener listener = method.getAnnotation(EventListener.class);
+            if (method.getReturnType() != Void.TYPE || (params = method.getParameterTypes()).length != 1) continue;
+            PriorityQueue active = this.listeners.computeIfAbsent(params[0], v -> new PriorityQueue());
+            active.add(new Listener(method, obj, listener.receiveCanceled(), listener.priority()));
         }
     }
 
-    public native Object subscribe(Object subscriber);
-
-    public native Object unsubscribe(Object subscriber);
-
-    @SuppressWarnings({"unused", "FieldCanBeLocal"}) // Used natively
-    public final static class InvokerNode
-    {
-        private final InvokerNode next;
-        private final Invoker invoker;
-        private final Object subscriber;
-        private final Integer priority; // not int, for objectfuscation in bonfuscator
-
-        private InvokerNode(Object invoker,
-                            Object subscriber,
-                            Object priority)
-        {
-            this.next = null;
-            this.invoker = (Invoker) invoker;
-            this.subscriber = subscriber;
-            this.priority = (Integer) priority;
+    @Override
+    public void unsubscribe(Object obj) {
+        if (this.subscribers.remove(obj)) {
+            this.listeners.values().forEach(set -> set.removeIf(l -> l.getSubscriber() == obj));
+            this.listeners.entrySet().removeIf(e -> ((PriorityQueue)e.getValue()).isEmpty());
         }
     }
 
-    @FunctionalInterface
-    public interface Invoker
-    {
-        void invoke(Object event);
+    @Override
+    public boolean dispatch(Event event) {
+        if (event == null) {
+            return false;
+        }
+        PriorityQueue<Listener> active = this.listeners.get(event.getClass());
+        if (active == null || active.isEmpty()) {
+            return false;
+        }
+        for (Listener listener : new ArrayList<Listener>(active)) {
+            if (event.isCanceled() && !listener.isReceiveCanceled()) continue;
+            listener.invokeSubscriber(event);
+        }
+        return event.isCanceled();
     }
 }

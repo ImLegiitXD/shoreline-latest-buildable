@@ -13,8 +13,6 @@ import net.shoreline.client.impl.event.gui.hud.PlayerListColumnsEvent;
 import net.shoreline.client.impl.event.gui.hud.PlayerListEvent;
 import net.shoreline.client.impl.event.gui.hud.PlayerListIconEvent;
 import net.shoreline.client.impl.event.gui.hud.PlayerListNameEvent;
-import net.shoreline.client.impl.irc.IRCManager;
-import net.shoreline.client.impl.irc.user.OnlineUser;
 import net.shoreline.client.impl.module.client.SocialsModule;
 import net.shoreline.client.init.Managers;
 import net.shoreline.eventbus.annotation.EventListener;
@@ -75,12 +73,6 @@ public class ExtraTabModule extends ToggleModule
         for (String name : names)
         {
             String name1 = stripControlCodes(name);
-            OnlineUser onlineUser = IRCManager.getInstance().findOnlineUser(name1);
-            if (onlineUser != null)
-            {
-                event.cancel();
-                break;
-            }
         }
     }
 
@@ -92,17 +84,6 @@ public class ExtraTabModule extends ToggleModule
         {
             // String name1 = AWTFontRenderer.stripControlCodes(name);
             String name1 = stripControlCodes(name);
-            OnlineUser onlineUser = IRCManager.getInstance().findOnlineUser(name1);
-            if (onlineUser != null)
-            {
-                event.cancel();
-                Identifier identifier = NametagsModule.getInstance().getNametagLogo(onlineUser.getUsertype());
-                event.getMatrixStack().push();
-                RenderManager.rectTextured(event.getMatrixStack(), identifier, (float) event.getX() + 1.0f, (float) event.getX() + 9.0f, (float) event.getY(), (float) event.getY() + 8.0f,
-                        0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-                event.getMatrixStack().pop();
-                break;
-            }
         }
     }
 

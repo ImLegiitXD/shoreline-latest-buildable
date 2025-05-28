@@ -10,9 +10,6 @@ import net.shoreline.client.api.module.ToggleModule;
 import net.shoreline.client.impl.event.config.ConfigUpdateEvent;
 import net.shoreline.client.impl.event.network.CapesEvent;
 import net.shoreline.client.impl.event.network.GameJoinEvent;
-import net.shoreline.client.impl.irc.IRCManager;
-import net.shoreline.client.impl.irc.packet.client.CPacketPing;
-import net.shoreline.client.impl.irc.user.OnlineUser;
 import net.shoreline.client.mixin.accessor.AccessorGameOptions;
 import net.shoreline.eventbus.annotation.EventListener;
 import net.shoreline.eventbus.event.StageEvent;
@@ -23,6 +20,7 @@ public final class CapesModule extends ToggleModule
 
     public Config<Capes> clientConfig = register(new EnumConfig<>("Client", "Shows client capes", Capes.OFF, Capes.values()));
     Config<Boolean> optifineConfig = register(new BooleanConfig("Optifine", "Shows optifine capes", true));
+    Config<CapeType> capeTypeConfig = register(new EnumConfig<>("Type", "Cape version to display", CapeType.RELEASE, CapeType.values()));
 
     private boolean capesEnabled;
 
@@ -69,37 +67,36 @@ public final class CapesModule extends ToggleModule
         }
         event.cancel();
         event.setShowOptifine(optifineConfig.getValue());
-        OnlineUser onlineUser = IRCManager.getInstance().findOnlineUser(event.getGameProfile().getName());
-        if (onlineUser != null && onlineUser.getCapeColor() != Capes.OFF)
-        {
-            String capePath = getCapePath(onlineUser);
-            event.setTexture(Identifier.of("shoreline", capePath));
-        }
+
+        String capePath = getCapePath();
+        event.setTexture(Identifier.of("shoreline", capePath));
     }
 
     @EventListener
     public void onConfigUpdate(ConfigUpdateEvent event)
     {
-        if (event.getConfig() == clientConfig && event.getStage() == StageEvent.EventStage.POST)
-        {
-            IRCManager.getInstance().sendPingPacket();
-        }
     }
 
-    private String getCapePath(OnlineUser onlineUser)
+    private String getCapePath()
     {
         StringBuilder capePath = new StringBuilder("cape");
-        switch (onlineUser.getCapeColor())
+
+        // Configuración del color de fondo
+        switch (clientConfig.getValue())
         {
             case WHITE -> capePath.append("/white_bg");
             case BLACK -> capePath.append("/black_bg");
+            case OFF -> {}
         }
-        switch (onlineUser.getUsertype())
+
+        // Configuración del tipo de capa
+        switch (capeTypeConfig.getValue())
         {
             case RELEASE -> capePath.append("/white.png");
             case BETA -> capePath.append("/blue.png");
             case DEV -> capePath.append("/red.png");
         }
+
         return capePath.toString();
     }
 
@@ -108,5 +105,12 @@ public final class CapesModule extends ToggleModule
         WHITE,
         BLACK,
         OFF
+    }
+
+    public enum CapeType
+    {
+        RELEASE,
+        BETA,
+        DEV
     }
 }
