@@ -81,7 +81,6 @@ public final class CapesModule extends ToggleModule
     {
         StringBuilder capePath = new StringBuilder("cape");
 
-        // Configuración del color de fondo
         switch (clientConfig.getValue())
         {
             case WHITE -> capePath.append("/white_bg");
@@ -89,7 +88,6 @@ public final class CapesModule extends ToggleModule
             case OFF -> {}
         }
 
-        // Configuración del tipo de capa
         switch (capeTypeConfig.getValue())
         {
             case RELEASE -> capePath.append("/white.png");
