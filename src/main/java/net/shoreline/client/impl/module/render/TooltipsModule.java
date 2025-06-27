@@ -47,43 +47,47 @@ public class TooltipsModule extends ToggleModule
         {
             return;
         }
-        ContainerComponent compoundTag = stack.get(DataComponentTypes.CONTAINER);
-        NbtComponent nbtComponent = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
-        if (shulkersConfig.getValue() && compoundTag != null && nbtComponent != null && ItemUtil.isShulker(stack.getItem()))
-        {
+
+        if (shulkersConfig.getValue() && ItemUtil.isShulker(stack.getItem())) {
+            ContainerComponent container = stack.get(DataComponentTypes.CONTAINER);
+            if (container == null || container.streamNonEmpty().findAny().isEmpty()) {
+                return;
+            }
+
             event.cancel();
             event.context.getMatrices().push();
             event.context.getMatrices().translate(0.0f, 0.0f, 600.0f);
-            DefaultedList<ItemStack> defaultedList = DefaultedList.ofSize(27, ItemStack.EMPTY);
-            NbtCompound nbtCompound = nbtComponent.copyNbt();
-            NbtList nbtList = nbtCompound.getList("Items", NbtElement.COMPOUND_TYPE);
-            List<ItemStack> stacks = compoundTag.stream().toList();
-            for (int i = 0; i < nbtList.size(); ++i)
-            {
-                NbtCompound nbtCompound1 = nbtList.getCompound(i);
-                int j = nbtCompound1.getByte("Slot") & 0xFF;
-                if (j < 0 || j >= defaultedList.size())
-                {
-                    continue;
-                }
-                defaultedList.set(j, stacks.get(i));
-            }
+
+            DefaultedList<ItemStack> shulkerInventory = DefaultedList.ofSize(27, ItemStack.EMPTY);
+
+            container.stream()
+                    .filter(itemStack -> !itemStack.isEmpty())
+                    .forEach(itemStack -> {
+                        for (int i = 0; i < shulkerInventory.size(); i++) {
+                            if (shulkerInventory.get(i).isEmpty()) {
+                                shulkerInventory.set(i, itemStack.copy());
+                                break;
+                            }
+                        }
+                    });
+
             RenderManager.rect(event.context.getMatrices(), event.getX() + 8.0,
                     event.getY() - 21.0, 150.0, 13.0, ColorsModule.getInstance().getRGB(170));
 
-            RenderManager.enableScissor(event.getX() + 8.0,
-                    event.getY() - 21.0, event.getX() + 158.0, event.getY() - 8.0);
-            RenderManager.renderText(event.getContext(), stack.getName().getString(),
-                    event.getX() + 11.0f, event.getY() - 18.0f, -1);
+            RenderManager.enableScissor(event.getX() + 8.0, event.getY() - 21.0, event.getX() + 158.0, event.getY() - 8.0);
+            RenderManager.renderText(event.getContext(), stack.getName().getString(), event.getX() + 11.0f, event.getY() - 18.0f, -1);
             RenderManager.disableScissor();
 
-            RenderManager.rect(event.context.getMatrices(), event.getX() + 8.0,
-                    event.getY() - 8.0, 150.0, 55.0, 0x77000000);
-            for (int i = 0; i < defaultedList.size(); i++)
-            {
-                event.context.drawItem(defaultedList.get(i), event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
-                event.context.drawItemInSlot(mc.textRenderer, defaultedList.get(i),
-                        event.getX() + (i % 9) * 16 + 9, event.getY() + (i / 9) * 16 - 5);
+            RenderManager.rect(event.context.getMatrices(), event.getX() + 8.0, event.getY() - 8.0, 150.0, 55.0, 0x77000000);
+
+            for (int i = 0; i < shulkerInventory.size(); i++) {
+                ItemStack itemStack = shulkerInventory.get(i);
+                if (!itemStack.isEmpty()) {
+                    int x = event.getX() + (i % 9) * 16 + 9;
+                    int y = event.getY() + (i / 9) * 16 - 5;
+                    event.context.drawItem(itemStack, x, y);
+                    event.context.drawItemInSlot(mc.textRenderer, itemStack, x, y);
+                }
             }
             event.context.getMatrices().pop();
         }

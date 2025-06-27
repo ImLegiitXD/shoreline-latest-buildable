@@ -48,8 +48,6 @@ public class CommandManager implements Globals
     {
         EventBus.INSTANCE.subscribe(this);
 
-        String rank = "dev";
-
         register(
                 new BindCommand(),
                 new ConfigCommand(),
@@ -72,7 +70,7 @@ public class CommandManager implements Globals
                 new OpenFolderCommand(),
                 new PrefixCommand(),
                 new QueueCommand(),
-                // new RegearCommand(),
+                new RegearCommand(),
                 new ResetCommand(),
                 new ResetGuiCommand(),
                 new SaveCommand(),
