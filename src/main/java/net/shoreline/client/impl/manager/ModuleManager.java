@@ -36,6 +36,7 @@ public final class ModuleManager
                 // Client
                 new AnticheatModule(),
                 new CapesModule(),
+                new RichPresenceModule(),
                 new ChatModule(),
                 new ClickGuiModule(),
                 new ColorsModule(),
@@ -72,7 +73,7 @@ public final class ModuleManager
                 new TriggerModule(),
                 // Exploit
                 new AntiHungerModule(),
-                // new BacktrackModule(),
+                new BacktrackModule(),
                 new ChorusControlModule(),
                 new ChorusInvincibilityModule(),
                 new ClientSpoofModule(),
@@ -99,6 +100,7 @@ public final class ModuleManager
                 new AutoAnvilRenameModule(),
                 new AutoEatModule(),
                 new AutoFishModule(),
+                new AutoFrameDupeModule(),
                 new AutoMountModule(),
                 new AutoReconnectModule(),
                 new AutoRespawnModule(),

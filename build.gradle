@@ -1,6 +1,7 @@
 plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT'
     id 'com.github.gmazzo.buildconfig' version '5.3.5'
+    id 'com.gradleup.shadow' version '9.0.0-beta4'
 }
 
 sourceCompatibility = JavaVersion.VERSION_21
@@ -30,10 +31,10 @@ loom {
 }
 
 repositories {
-    mavenCentral() {
-        url "https://jitpack.io"
-        url "https://impactdevelopment.github.io/maven/"
-    }
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url "https://impactdevelopment.github.io/maven/" }
+    maven { url = "https://maven.meteordev.org/releases" }
 }
 
 dependencies {
@@ -43,6 +44,9 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "cabaletta:baritone-api:${baritone_api_version}"
+
+    // Discord Implementation $$$
+    implementation(shadow("meteordevelopment:discord-ipc:1.1"))
 }
 
 processResources {
@@ -60,6 +64,16 @@ tasks.withType(JavaCompile).configureEach {
     dependsOn generateBuildConfig
 }
 
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier.set("dev")
+}
+
+remapJar {
+    dependsOn(shadowJar)
+    inputFile = tasks.shadowJar.archiveFile
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
@@ -68,31 +82,25 @@ tasks.register('buildClientOnly') {
     doFirst {
         tasks.remapLoader.enabled = false
     }
-
     finalizedBy 'build'
 }
 
-tasks.register('clientJar', Jar) {
-    dependsOn remapJar
-
-    outputs.upToDateWhen { false }
-
-    from(zipTree(tasks.remapJar.archivePath))
-
-    include 'net/shoreline/client/**'
-    include 'net/shoreline/eventbus/**'
-//    include 'net/shoreline/eventbus/annotation/**'
-//    include 'net/shoreline/eventbus/event/**'
-    include 'assets/**'
-    include 'shoreline-refmap.json'
-    include 'shoreline.accesswidener'
-
-    archiveBaseName = "client-raw"
-    archiveClassifier = ""
-    archiveVersion = ""
-}
-
-build.dependsOn(clientJar)
+// tasks.register('clientJar', Jar) {
+//     dependsOn remapJar
+//     outputs.upToDateWhen { false }
+//
+//     from(zipTree(tasks.remapJar.archivePath))
+//
+//     include 'net/shoreline/client/**'
+//     include 'net/shoreline/eventbus/**'
+//     include 'assets/**'
+//     include 'shoreline-refmap.json'
+//     include 'shoreline.accesswidener'
+//
+//     archiveBaseName = "client-raw"
+//     archiveClassifier = ""
+//     archiveVersion = ""
+// }
 
 def execute(String cmd) {
     try {

@@ -245,11 +245,11 @@ public class HUDModule extends ToggleModule
             long drawnCount = modules.stream().filter(ToggleModule.class::isInstance)
                     .map(ToggleModule.class::cast).filter(m -> !m.isHidden()).count();
 
-            if (watermarkConfig.getValue())
-            {
-                RenderManager.renderText(event.getContext(), String.format("%s %s (%s%s%s)",
-                        ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER, BuildConfig.BUILD_IDENTIFIER,
-                                !BuildConfig.BUILD_IDENTIFIER.equals("dev") ? "-" + BuildConfig.BUILD_NUMBER : "",
+            if (watermarkConfig.getValue()) {
+                RenderManager.renderText(event.getContext(), String.format("%s %s (%s-%s%s)",
+                                ShorelineMod.MOD_NAME, ShorelineMod.MOD_VER,
+                                BuildConfig.BUILD_IDENTIFIER,
+                                BuildConfig.BUILD_NUMBER,
                                 !BuildConfig.HASH.equals("null") ? "-" + BuildConfig.HASH : ""),
                         2.0f, topLeft, getHudColor(drawnCount - rainbowOffset));
                 topLeft += RenderManager.textHeight();
