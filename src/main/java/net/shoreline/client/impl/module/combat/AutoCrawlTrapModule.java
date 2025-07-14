@@ -88,7 +88,12 @@ public class AutoCrawlTrapModule extends ObsidianPlacerModule
             return;
         }
 
-        final int slot = getResistantBlockItem().slot();
+        BlockSlot blockSlot = getResistantBlockItem();
+        if (blockSlot == null) {
+            return;
+        }
+        
+        int slot = blockSlot.slot();
         if (slot == -1)
         {
             surround.clear();
