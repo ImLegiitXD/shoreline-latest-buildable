@@ -141,7 +141,7 @@ public class SelfFillModule extends ObsidianPlacerModule
 
     private void attackPlace(BlockPos targetPos)
     {
-        final int slot = getResistantBlockItem();
+        final int slot = getResistantBlockItem().slot();
         if (slot == -1)
         {
             return;

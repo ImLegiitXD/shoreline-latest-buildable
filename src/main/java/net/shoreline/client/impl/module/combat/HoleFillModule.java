@@ -99,7 +99,7 @@ public class HoleFillModule extends ObsidianPlacerModule
             return;
         }
 
-        final int slot = websConfig.getValue() ? getBlockItemSlot(Blocks.COBWEB) : getResistantBlockItem();
+        final int slot = websConfig.getValue() ? getBlockItemSlot(Blocks.COBWEB) : getResistantBlockItem().slot();
         if (slot == -1)
         {
             fills.clear();

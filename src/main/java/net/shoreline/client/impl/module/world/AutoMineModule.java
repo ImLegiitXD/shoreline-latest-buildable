@@ -76,6 +76,10 @@ public class AutoMineModule extends CombatModule
     Config<Color> colorDoneConfig = register(new ColorConfig("DoneColor", "The done render color", Color.GREEN, false, false));
     Config<Integer> fadeTimeConfig = register(new NumberConfig<>("Fade-Time", "Time to fade", 0, 250, 1000, () -> false));
     Config<Boolean> smoothColorConfig = register(new BooleanConfig("SmoothColor", "Interpolates from start to done color", false, () -> false));
+    Config<Boolean> debugConfig = new BooleanConfig("Debug", "Renders the debug mode for mines", false);
+    Config<Color> packetColorConfig = new ColorConfig("PacketColor", "The packet mine render color", new Color(0, 0, 255), false, false, () -> this.debugConfig.getValue());
+    Config<Color> instantColorConfig = new ColorConfig("InstantColor", "The instant mine render color", new Color(255, 0, 255), false, false, () -> this.debugConfig.getValue());
+    Config<Boolean> debugTicksConfig = new BooleanConfig("Debug-Ticks", "Shows the mining ticks", false, () -> this.debugConfig.getValue());
 
     private PlayerEntity playerTarget;
     private MineData packetMine, instantMine; // mining2 should always be the instant mine
@@ -102,6 +106,10 @@ public class AutoMineModule extends CombatModule
     {
         super("AutoMine", "Automatically mines blocks", ModuleCategory.WORLD, 900);
         INSTANCE = this;
+        this.register(this.debugConfig);
+        this.register(this.packetColorConfig);
+        this.register(this.instantColorConfig);
+        this.register(this.debugTicksConfig);
     }
 
     public static AutoMineModule getInstance()
@@ -716,7 +724,11 @@ public class AutoMineModule extends CombatModule
 
         int boxColor;
         int lineColor;
-        if (smoothColorConfig.getValue())
+
+        if (this.debugConfig.getValue().booleanValue()) {
+            boxColor = instantMine ? ((ColorConfig)this.instantColorConfig).getRgb(boxAlpha) : ((ColorConfig)this.packetColorConfig).getRgb(boxAlpha);
+            lineColor = instantMine ? ((ColorConfig)this.instantColorConfig).getRgb(lineAlpha) : ((ColorConfig)this.packetColorConfig).getRgb(lineAlpha);
+        } else if (smoothColorConfig.getValue())
         {
             boxColor = !canMine(data.getState()) ? ((ColorConfig) colorDoneConfig).getRgb(boxAlpha) :
                     ColorUtil.interpolateColor(Math.min(data.getBlockDamage(), 1.0f), ((ColorConfig) colorDoneConfig).getValue(boxAlpha), ((ColorConfig) colorConfig).getValue(boxAlpha)).getRGB();
@@ -747,6 +759,9 @@ public class AutoMineModule extends CombatModule
         final Box scaled = new Box(center, center).expand(dx * scale, dy * scale, dz * scale);
         RenderManager.renderBox(matrixStack, scaled, boxColor);
         RenderManager.renderBoundingBox(matrixStack, scaled, 1.5f, lineColor);
+        if (this.debugTicksConfig.getValue().booleanValue()) {
+            RenderManager.renderSign(String.valueOf(data.getTicksMining()), center, -1);
+        }
     }
 
     public void startMining(MineData data)

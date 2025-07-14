@@ -78,7 +78,7 @@ public class BasePlaceModule extends ObsidianPlacerModule
         }
 
         BlockState state = mc.world.getBlockState(crystalBase);
-        int slot = getResistantBlockItem();
+        int slot = getResistantBlockItem().slot();
         if (slot == -1 || !state.isReplaceable())
         {
             return;

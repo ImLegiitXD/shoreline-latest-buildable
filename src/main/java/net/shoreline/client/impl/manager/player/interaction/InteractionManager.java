@@ -1,14 +1,21 @@
 package net.shoreline.client.impl.manager.player.interaction;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.shoreline.client.impl.module.client.AnticheatModule;
 import net.shoreline.client.impl.module.world.AirPlaceModule;
 import net.shoreline.client.init.Managers;
@@ -21,6 +28,8 @@ import net.shoreline.eventbus.EventBus;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author xgraza
@@ -28,10 +37,31 @@ import java.util.Set;
  */
 public final class InteractionManager implements Globals
 {
+    private final Map<Integer, Integer> placedOnEntities = new ConcurrentHashMap<>();
+
     public InteractionManager()
     {
         EventBus.INSTANCE.subscribe(this);
     }
+
+    public boolean canPlace(BlockPos pos, Block block) {
+        BlockState state = block.getDefaultState();
+        VoxelShape shape = block.getOutlineShape(state, mc.world, pos, ShapeContext.absent())
+                .offset(pos.getX(), pos.getY(), pos.getZ());
+        if (!shape.isEmpty()) {
+            for (Entity entity : mc.world.getOtherEntities(null, shape.getBoundingBox())) {
+                if (entity.isSpectator() || !entity.isAlive() ||
+                        !VoxelShapes.matchesAnywhere(shape, VoxelShapes.cuboid(entity.getBoundingBox()), BooleanBiFunction.AND) ||
+                        entity instanceof ItemFrameEntity && (!this.placedOnEntities.containsKey(entity.getId()) ||
+                                this.placedOnEntities.get(entity.getId()) <= AnticheatModule.getInstance().getEntityPlaceThreshold())) {
+                    continue;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public boolean placeBlock(final BlockPos pos,
                               final int slot,
@@ -47,8 +77,31 @@ public final class InteractionManager implements Globals
                               final boolean strictDirection,
                               final boolean clientSwing,
                               final RotationCallback rotationCallback,
-                              final boolean airPlace)
-    {
+                              final boolean airPlace) {
+        BlockState airState = Blocks.AIR.getDefaultState();
+        VoxelShape shape = airState.getOutlineShape(mc.world, pos, ShapeContext.absent())
+                .offset(pos.getX(), pos.getY(), pos.getZ());
+
+        boolean isEntityBlockingPlacement = false;
+        if (!shape.isEmpty()) {
+            for (Entity entity : mc.world.getOtherEntities(null, shape.getBoundingBox())) {
+                if (entity.isSpectator() || !entity.isAlive() ||
+                        !VoxelShapes.matchesAnywhere(shape, VoxelShapes.cuboid(entity.getBoundingBox()), BooleanBiFunction.AND)) {
+                    continue;
+                }
+                if (entity instanceof ItemFrameEntity) {
+                    this.placedOnEntities.compute(entity.getId(), (k, attempts) -> attempts != null ? attempts + 1 : 1);
+                    if (this.placedOnEntities.getOrDefault(entity.getId(), 0) <= AnticheatModule.getInstance().getEntityPlaceThreshold()) {
+                        continue;
+                    }
+                }
+                isEntityBlockingPlacement = true;
+                break;
+            }
+        }
+        if (isEntityBlockingPlacement) {
+            return false;
+        }
         Direction direction = getInteractDirectionInternal(pos, strictDirection);
         if (airPlace || AirPlaceModule.getInstance().isEnabled() && direction == null)
         {
@@ -79,8 +132,31 @@ public final class InteractionManager implements Globals
                               final boolean clientSwing,
                               final boolean packet,
                               final boolean airPlace,
-                              final RotationCallback rotationCallback)
-    {
+                              final RotationCallback rotationCallback) {
+        BlockState airState = Blocks.AIR.getDefaultState();
+        VoxelShape shape = airState.getOutlineShape(mc.world, pos, ShapeContext.absent())
+                .offset(pos.getX(), pos.getY(), pos.getZ());
+
+        boolean isEntityBlockingPlacement = false;
+        if (!shape.isEmpty()) {
+            for (Entity entity : mc.world.getOtherEntities(null, shape.getBoundingBox())) {
+                if (entity.isSpectator() || !entity.isAlive() ||
+                        !VoxelShapes.matchesAnywhere(shape, VoxelShapes.cuboid(entity.getBoundingBox()), BooleanBiFunction.AND)) {
+                    continue;
+                }
+                if (entity instanceof ItemFrameEntity) {
+                    this.placedOnEntities.compute(entity.getId(), (k, attempts) -> attempts != null ? attempts + 1 : 1);
+                    if (this.placedOnEntities.getOrDefault(entity.getId(), 0) <= AnticheatModule.getInstance().getEntityPlaceThreshold()) {
+                        continue;
+                    }
+                }
+                isEntityBlockingPlacement = true;
+                break;
+            }
+        }
+        if (isEntityBlockingPlacement) {
+            return false;
+        }
         Direction direction = getInteractDirectionInternal(pos, strictDirection);
         if (airPlace || AirPlaceModule.getInstance().isEnabled() && direction == null)
         {
@@ -131,7 +207,6 @@ public final class InteractionManager implements Globals
         if (isSpoofing)
         {
             Managers.INVENTORY.setSlot(slot);
-            // mc.player.getInventory().selectedSlot = slot;
         }
 
         if (grimAirPlace)
@@ -161,7 +236,6 @@ public final class InteractionManager implements Globals
         if (isSpoofing)
         {
             Managers.INVENTORY.syncToClient();
-            //mc.player.getInventory().selectedSlot = previousSlot;
         }
 
         return result;
@@ -177,7 +251,6 @@ public final class InteractionManager implements Globals
         if (isSpoofing)
         {
             Managers.INVENTORY.setSlot(slot);
-            // mc.player.getInventory().selectedSlot = slot;
         }
 
         if (grimAirPlace)
@@ -207,7 +280,6 @@ public final class InteractionManager implements Globals
         if (isSpoofing)
         {
             Managers.INVENTORY.syncToClient();
-            //mc.player.getInventory().selectedSlot = previousSlot;
         }
 
         return result;
@@ -248,8 +320,6 @@ public final class InteractionManager implements Globals
                                               final Hand hand)
     {
         return mc.interactionManager.interactBlock(mc.player, hand, hitResult);
-        // Managers.NETWORK.sendSequencedPacket(sequence -> new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, sequence));
-        // return ((AccessorClientPlayerInteractionManager) mc.interactionManager).hookInteractBlockInternal(mc.player, Hand.MAIN_HAND, hitResult);
     }
 
     public ActionResult placeBlockPacket(final BlockHitResult hitResult,

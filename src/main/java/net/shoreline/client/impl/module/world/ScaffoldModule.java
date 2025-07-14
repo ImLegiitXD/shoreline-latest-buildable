@@ -50,6 +50,7 @@ public final class ScaffoldModule extends BlockPlacerModule
     Config<BlockPicker> pickerConfig = register(new EnumConfig<>("BlockSelection", "How to pick a block from the hotbar", BlockPicker.NORMAL, BlockPicker.values()));
     Config<Boolean> renderConfig = register(new BooleanConfig("Render", "Renders where scaffold is placing blocks", false));
     Config<Integer> fadeTimeConfig = register(new NumberConfig<>("Fade-Time", "Timer for the fade", 0, 250, 1000, () -> false));
+    Config<Boolean> stopMotionConfig = register(new BooleanConfig("StopMotion", "Stops player motion when placing blocks", false));
 
     private final Map<BlockPos, Animation> fadeList = new HashMap<>();
     private BlockData blockData;
@@ -87,7 +88,8 @@ public final class ScaffoldModule extends BlockPlacerModule
             return;
         }
 
-        int slot = getBlockSlot();
+        BlockSlot blockSlot = getBlockSlot();
+        int slot = blockSlot.slot();
         if (slot == -1)
         {
             blockData = null;
@@ -152,6 +154,13 @@ public final class ScaffoldModule extends BlockPlacerModule
         {
             Managers.INVENTORY.setSlot(slot);
         }
+
+        Vec3d prevMotion = mc.player.getVelocity();
+        if (stopMotionConfig.getValue())
+        {
+            mc.player.setVelocity(0.0, 0.0, 0.0);
+        }
+
         boolean result = Managers.INTERACT.placeBlock(blockData.getBlockPos(), slot, false, false, false, (state, angles) ->
         {
             if (rotateConfig.getValue())
@@ -173,15 +182,18 @@ public final class ScaffoldModule extends BlockPlacerModule
                         setRotation(rotations[0], rotations[1]);
                     }
                 }
-                else
+                else if (grimConfig.getValue())
                 {
-                    if (grimConfig.getValue())
-                    {
-                        Managers.ROTATION.setRotationSilentSync();
-                    }
+                    Managers.ROTATION.setRotationSilentSync();
                 }
             }
         });
+
+        if (stopMotionConfig.getValue())
+        {
+            mc.player.setVelocity(prevMotion);
+        }
+
         if (result)
         {
             if (!isGrim() && towerConfig.getValue() && mc.options.jumpKey.isPressed())
@@ -283,14 +295,15 @@ public final class ScaffoldModule extends BlockPlacerModule
         return null;
     }
 
-    private int getBlockSlot()
+    private BlockSlot getBlockSlot()
     {
         final ItemStack serverStack = Managers.INVENTORY.getServerItem();
         if (!serverStack.isEmpty() && serverStack.getItem() instanceof BlockItem blockItem && validScaffoldBlock(blockItem.getBlock()))
         {
-            return Managers.INVENTORY.getServerSlot();
+            return new BlockSlot(blockItem.getBlock(), Managers.INVENTORY.getServerSlot());
         }
 
+        Block block = null;
         int blockSlot = -1;
         int count = 0;
         for (int i = 0; i < 9; ++i)
@@ -300,18 +313,19 @@ public final class ScaffoldModule extends BlockPlacerModule
             {
                 if (pickerConfig.getValue() == BlockPicker.NORMAL)
                 {
-                    return i;
+                    return new BlockSlot(blockItem.getBlock(), i);
                 }
 
                 if (blockSlot == -1 || itemStack.getCount() > count)
                 {
+                    block = blockItem.getBlock();
                     blockSlot = i;
                     count = itemStack.getCount();
                 }
             }
         }
 
-        return blockSlot;
+        return new BlockSlot(block, blockSlot);
     }
 
     private boolean validScaffoldBlock(Block block)
@@ -383,4 +397,6 @@ public final class ScaffoldModule extends BlockPlacerModule
         NORMAL,
         GREATEST
     }
+
+    private record BlockSlot(Block block, int slot) {}
 }

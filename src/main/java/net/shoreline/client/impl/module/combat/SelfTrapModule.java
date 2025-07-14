@@ -121,7 +121,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
             return;
         }
 
-        final int slot = getResistantBlockItem();
+        final int slot = getResistantBlockItem().slot();
         if (slot == -1)
         {
             surround.clear();
@@ -213,7 +213,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
             {
                 if (blockState.isReplaceable() && mc.world.canPlace(DEFAULT_OBSIDIAN_STATE, targetPos, ShapeContext.absent()))
                 {
-                    final int slot = getResistantBlockItem();
+                    final int slot = getResistantBlockItem().slot();
                     if (slot == -1)
                     {
                         return;
@@ -237,7 +237,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
             BlockPos pos = BlockPos.ofFloored(packet.getX(), packet.getY(), packet.getZ());
             if (surround.contains(pos))
             {
-                final int slot = getResistantBlockItem();
+                final int slot = getResistantBlockItem().slot();
                 if (slot == -1)
                 {
                     return;
@@ -256,7 +256,7 @@ public final class SelfTrapModule extends ObsidianPlacerModule
                     continue;
                 }
 
-                final int slot = getResistantBlockItem();
+                final int slot = getResistantBlockItem().slot();
                 if (slot == -1)
                 {
                     return;

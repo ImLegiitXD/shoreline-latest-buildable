@@ -61,6 +61,11 @@ public final class CapesModule extends ToggleModule
     @EventListener
     public void onCapes(CapesEvent event)
     {
+        if (clientConfig.getValue() == Capes.OFF)
+        {
+            return;
+        }
+
         if (!optifineConfig.getValue() && clientConfig.getValue() == Capes.OFF)
         {
             return;
@@ -85,7 +90,6 @@ public final class CapesModule extends ToggleModule
         {
             case WHITE -> capePath.append("/white_bg");
             case BLACK -> capePath.append("/black_bg");
-            case OFF -> {}
         }
 
         switch (capeTypeConfig.getValue())
