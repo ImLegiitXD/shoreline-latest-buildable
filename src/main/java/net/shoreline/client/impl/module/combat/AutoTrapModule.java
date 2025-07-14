@@ -101,7 +101,12 @@ public final class AutoTrapModule extends ObsidianPlacerModule
             return;
         }
 
-        final int slot = getResistantBlockItem().slot();
+         BlockSlot blockSlot = getResistantBlockItem();
+        if (blockSlot == null) {
+            return;
+        }
+        
+        int slot = blockSlot.slot();
         if (slot == -1)
         {
             surround.clear();
@@ -200,7 +205,12 @@ public final class AutoTrapModule extends ObsidianPlacerModule
             {
                 if (blockState.isReplaceable() && mc.world.canPlace(DEFAULT_OBSIDIAN_STATE, targetPos, ShapeContext.absent()))
                 {
-                    final int slot = getResistantBlockItem().slot();
+                     BlockSlot blockSlot = getResistantBlockItem();
+        if (blockSlot == null) {
+            return;
+        }
+        
+        int slot = blockSlot.slot();
                     if (slot == -1)
                     {
                         return;
